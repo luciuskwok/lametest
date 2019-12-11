@@ -6,6 +6,11 @@
 //  Copyright © 2019 Lucius Kwok. All rights reserved.
 //
 
+/* Tips:
+	- In order to run this, the LAME.framework folder will need to be copied into the same folder as the executable file.
+	- This command line tool takes only 1 argument: the input file name. This is set to "test.wav" by the Xcode scheme under "Arguements Passed On Launch".
+ */
+
 #include <stdio.h>
 #include <string.h>
 #include "LAME/lame.h"
