@@ -27,6 +27,7 @@
 		E05018F123A0AA2700760688 /* lametest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = lametest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E05018F423A0AA2700760688 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		E05018FB23A0B13900760688 /* LAME.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = LAME.framework; sourceTree = "<group>"; };
+		E05018FD23A0B69400760688 /* lametest.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = lametest.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,6 +62,7 @@
 		E05018F323A0AA2700760688 /* lametest */ = {
 			isa = PBXGroup;
 			children = (
+				E05018FD23A0B69400760688 /* lametest.entitlements */,
 				E05018F423A0AA2700760688 /* main.c */,
 			);
 			path = lametest;
@@ -242,28 +244,32 @@
 		E05018F923A0AA2700760688 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = NVBY6KRZL2;
+				CODE_SIGN_ENTITLEMENTS = lametest/lametest.entitlements;
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Debug;
 		};
 		E05018FA23A0AA2700760688 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = NVBY6KRZL2;
+				CODE_SIGN_ENTITLEMENTS = lametest/lametest.entitlements;
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Release;
 		};
