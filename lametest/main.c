@@ -61,6 +61,7 @@ int read_wav_header(FILE *fp, fpos_t *outDataOffset, uint32_t *outDataLength, ui
 	uint32_t header[3] = {0};
 	fread(header, 4, 3, fp);
 	if (_OSSwapInt32(header[0]) != 'RIFF' || _OSSwapInt32(header[2]) != 'WAVE') {
+		printf("Input is not a WAV file.");
 		goto error_exit;
 	}
 	
@@ -68,11 +69,17 @@ int read_wav_header(FILE *fp, fpos_t *outDataOffset, uint32_t *outDataLength, ui
 	FormatChunk formatChunk;
 	fpos_t formatChunkOffset = offset_of_chunk('fmt ', 12, fp);
 	if (formatChunkOffset == 0) {
+		printf("File is missing a format chunk.");
 		goto error_exit;
 	}
 	fseek(fp, formatChunkOffset, SEEK_SET);
 	fread(&formatChunk, sizeof(formatChunk), 1, fp);
 	if (formatChunk.formatTag != 1 || formatChunk.bitsPerSample != 16) {
+		printf("Unsupported WAV format, which must be 16-bit PCM.");
+		goto error_exit;
+	}
+	if (formatChunk.channels != 1 && formatChunk.channels != 2) {
+		printf("Unsupported %d number of channels, which must be 1 or 2.", formatChunk.channels);
 		goto error_exit;
 	}
 	*outChannels = formatChunk.channels;
@@ -166,7 +173,7 @@ int main(int argc, const char * argv[]) {
 	}
 	
 	// Set the bit rate in KBPS
-	err = lame_set_brate (flags, 320); // kbps
+	err = lame_set_brate (flags, 128 * channels); // kbps
 	if (err) {
 		printf("lame_set_brate() error %d", err);
 		goto lame_error;
@@ -196,10 +203,16 @@ int main(int argc, const char * argv[]) {
 		
 		fread(readBuffer, readCount, 1, inputFile);
 		
-		writeCount = lame_encode_buffer_interleaved(flags, (int16_t *)readBuffer, numSamples, writeBuffer, writeBufferSize);
+		if (channels == 1) {
+			writeCount = lame_encode_buffer(flags, (int16_t *)readBuffer, (int16_t *)readBuffer, numSamples, writeBuffer, writeBufferSize);
+		} else if (channels == 2) {
+			writeCount = lame_encode_buffer_interleaved(flags, (int16_t *)readBuffer, numSamples, writeBuffer, writeBufferSize);
+		} else {
+			writeCount = -1;
+		}
 		
 		if (writeCount < 0) {
-			printf("lame_encode_buffer_interleaved_int() error %d", writeCount);
+			printf("lame_encode_buffer() error %d", writeCount);
 			break;
 		} else if (writeCount > 0) {
 			fwrite(writeBuffer, writeCount, 1, outputFile);
