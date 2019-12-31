@@ -36,20 +36,28 @@ typedef struct {
 
 fpos_t offset_of_chunk(uint32_t chunk, fpos_t start, FILE *fp) {
 	fseek(fp, start, SEEK_SET);
-	uint32_t chunkHeader[2];
+	uint32_t chunkIdentifier;
+	uint32_t chunkDataSize;
 	unsigned long count;
 	
 	while (1) {
-		count = fread(chunkHeader, 4, 2, fp);
+		count = fread(&chunkIdentifier, 4, 1, fp);
 		if (count < 2) {
-			return 0; // not found
+			return 0; // reached end of file: chunk not found
 		}
-		if (_OSSwapInt32(chunkHeader[0]) == chunk) {
+		if (_OSSwapInt32(chunkIdentifier) == chunk) {
 			fpos_t mark = 0;
 			fgetpos(fp, &mark);
 			return mark - 8;
 		}
-		fseek(fp, chunkHeader[1], SEEK_CUR);
+		count = fread(&chunkDataSize, 4, 1, fp);
+		if (count < 2) {
+			return 0; // reached end of file: chunk not found
+		}
+		if (chunkDataSize % 2 == 1) {
+			chunkDataSize += 1; // skip over 1 pad byte if chunk data size is odd
+		}
+		fseek(fp, chunkDataSize, SEEK_CUR);
 	}
 }
 
