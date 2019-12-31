@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		E05018F523A0AA2700760688 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = E05018F423A0AA2700760688 /* main.c */; };
 		E05018FC23A0B13900760688 /* LAME.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E05018FB23A0B13900760688 /* LAME.framework */; };
+		E0948D3723BB131D00A4FD64 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E0948D3623BB131D00A4FD64 /* CoreServices.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -28,6 +29,7 @@
 		E05018F423A0AA2700760688 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		E05018FB23A0B13900760688 /* LAME.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = LAME.framework; sourceTree = "<group>"; };
 		E05018FD23A0B69400760688 /* lametest.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = lametest.entitlements; sourceTree = "<group>"; };
+		E0948D3623BB131D00A4FD64 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -35,6 +37,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E0948D3723BB131D00A4FD64 /* CoreServices.framework in Frameworks */,
 				E05018FC23A0B13900760688 /* LAME.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -45,9 +48,9 @@
 		E05018E823A0AA2700760688 = {
 			isa = PBXGroup;
 			children = (
-				E05018FB23A0B13900760688 /* LAME.framework */,
 				E05018F323A0AA2700760688 /* lametest */,
 				E05018F223A0AA2700760688 /* Products */,
+				E0948D3523BB131D00A4FD64 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -66,6 +69,15 @@
 				E05018F423A0AA2700760688 /* main.c */,
 			);
 			path = lametest;
+			sourceTree = "<group>";
+		};
+		E0948D3523BB131D00A4FD64 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				E05018FB23A0B13900760688 /* LAME.framework */,
+				E0948D3623BB131D00A4FD64 /* CoreServices.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
