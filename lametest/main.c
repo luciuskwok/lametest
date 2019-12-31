@@ -31,8 +31,6 @@ typedef struct {
 	uint16_t	bitsPerSample;		// sampleSize (8 or 16), also two's-complement for 16-bit, offset for 8-bit
 } FormatChunk;
 
-#pragma pack(pop)
-
 
 fpos_t offset_of_chunk(uint32_t chunk, fpos_t start, FILE *fp) {
 	fseek(fp, start, SEEK_SET);
@@ -42,16 +40,16 @@ fpos_t offset_of_chunk(uint32_t chunk, fpos_t start, FILE *fp) {
 	
 	while (1) {
 		count = fread(&chunkIdentifier, 4, 1, fp);
-		if (count < 2) {
+		if (count != 1) {
 			return 0; // reached end of file: chunk not found
 		}
 		if (_OSSwapInt32(chunkIdentifier) == chunk) {
 			fpos_t mark = 0;
 			fgetpos(fp, &mark);
-			return mark - 8;
+			return mark - 4;
 		}
 		count = fread(&chunkDataSize, 4, 1, fp);
-		if (count < 2) {
+		if (count != 1) {
 			return 0; // reached end of file: chunk not found
 		}
 		if (chunkDataSize % 2 == 1) {
@@ -69,7 +67,7 @@ int read_wav_header(FILE *fp, fpos_t *outDataOffset, uint32_t *outDataLength, ui
 	uint32_t header[3] = {0};
 	fread(header, 4, 3, fp);
 	if (_OSSwapInt32(header[0]) != 'RIFF' || _OSSwapInt32(header[2]) != 'WAVE') {
-		printf("Input is not a WAV file.");
+		printf("Input is not a WAV file.\n");
 		goto error_exit;
 	}
 	
@@ -77,32 +75,30 @@ int read_wav_header(FILE *fp, fpos_t *outDataOffset, uint32_t *outDataLength, ui
 	FormatChunk formatChunk;
 	fpos_t formatChunkOffset = offset_of_chunk('fmt ', 12, fp);
 	if (formatChunkOffset == 0) {
-		printf("File is missing a format chunk.");
+		printf("File is missing a format chunk.\n");
 		goto error_exit;
 	}
 	fseek(fp, formatChunkOffset, SEEK_SET);
 	fread(&formatChunk, sizeof(formatChunk), 1, fp);
 	if (formatChunk.formatTag != 1 || formatChunk.bitsPerSample != 16) {
-		printf("Unsupported WAV format, which must be 16-bit PCM.");
+		printf("Unsupported WAV format, which must be 16-bit PCM.\n");
 		goto error_exit;
 	}
 	if (formatChunk.channels != 1 && formatChunk.channels != 2) {
-		printf("Unsupported %d number of channels, which must be 1 or 2.", formatChunk.channels);
+		printf("Unsupported %d number of channels, which must be 1 or 2.\n", formatChunk.channels);
 		goto error_exit;
 	}
 	*outChannels = formatChunk.channels;
 	*outSampleRate = formatChunk.sampleRate;
 
-	// Read the data chunk.
-	uint32_t dataChunk[2] = {0};
+	// Read the data chunk offset and size.
 	fpos_t dataChunkOffset = offset_of_chunk('data', 12, fp);
 	if (dataChunkOffset == 0) {
 		goto error_exit;
 	}
-	fseek(fp, dataChunkOffset, SEEK_SET);
-	fread(dataChunk, 4, 2, fp);
 	*outDataOffset = dataChunkOffset + 8;
-	*outDataLength = dataChunk[1];
+	fseek(fp, dataChunkOffset + 4, SEEK_SET);
+	fread(outDataLength, 4, 1, fp);
 
 	return 0;
 	
@@ -153,20 +149,20 @@ int main(int argc, const char * argv[]) {
 	
 	err = lame_set_in_samplerate(flags, sampleRate);
 	if (err) {
-		printf("lame_set_in_samplerate() error %d", err);
+		printf("lame_set_in_samplerate() error %d.\n", err);
 		goto lame_error;
 	}
 	
 	err = lame_set_num_channels(flags, channels);
 	if (err) {
-		printf("lame_set_num_channels() error %d", err);
+		printf("lame_set_num_channels() error %d.\n", err);
 		goto lame_error;
 	}
 
 	// We will write the Xing VBR/INFO tag
 	err = lame_set_bWriteVbrTag (flags, 1);
 	if (err) {
-	   printf("lame_set_bWriteVbrTag() error %d", err);
+	   printf("lame_set_bWriteVbrTag() error %d.\n", err);
 	   goto lame_error;
 	}
 	
@@ -176,21 +172,21 @@ int main(int argc, const char * argv[]) {
 	// Constant Bit Rate (VBR off)
 	err = lame_set_VBR(flags, vbr_off);
 	if (err) {
-		printf("lame_set_VBR() error %d", err);
+		printf("lame_set_VBR() error %d.\n", err);
 		goto lame_error;
 	}
 	
 	// Set the bit rate in KBPS
 	err = lame_set_brate (flags, 128 * channels); // kbps
 	if (err) {
-		printf("lame_set_brate() error %d", err);
+		printf("lame_set_brate() error %d.\n", err);
 		goto lame_error;
 	}
 	
 	// Finish setting up the parameters
 	err = lame_init_params (flags);
 	if (err) {
-		printf("lame_init_params() error %d", err);
+		printf("lame_init_params() error %d.\n", err);
 		goto lame_error;
 	}
 
@@ -220,7 +216,7 @@ int main(int argc, const char * argv[]) {
 		}
 		
 		if (writeCount < 0) {
-			printf("lame_encode_buffer() error %d", writeCount);
+			printf("lame_encode_buffer() error %d.\n", writeCount);
 			break;
 		} else if (writeCount > 0) {
 			fwrite(writeBuffer, writeCount, 1, outputFile);
@@ -232,7 +228,7 @@ int main(int argc, const char * argv[]) {
 	// Flush remaining bytes
 	writeCount = lame_encode_flush(flags, writeBuffer, writeBufferSize);
 	if (writeCount < 0) {
-		printf("lame_encode_flush() error %d", writeCount);
+		printf("lame_encode_flush() error %d.\n", writeCount);
 	} else if (writeCount > 0) {
 		fwrite(writeBuffer, writeCount, 1, outputFile);
 	}
@@ -240,7 +236,7 @@ int main(int argc, const char * argv[]) {
 	// Write the Xing VBR/INFO tag at the beginning of the file.
 	writeCount = (int32_t)lame_get_lametag_frame(flags, writeBuffer, writeBufferSize);
 	if (writeCount < 0) {
-		printf("lame_get_lametag_frame() error %d", writeCount);
+		printf("lame_get_lametag_frame() error %d.\n", writeCount);
 	} else if (writeCount > 0) {
 		fseek(outputFile, 0, SEEK_SET);
 		fwrite(writeBuffer, writeCount, 1, outputFile);
@@ -249,7 +245,7 @@ int main(int argc, const char * argv[]) {
 	// Close the encoder
 	err = lame_close(flags);
 	if (err) {
-		printf("lame_close() error %d", err);
+		printf("lame_close() error %d.\n", err);
 	}
 	
 	// Close files
@@ -263,3 +259,5 @@ lame_error:
 	fclose(outputFile);
 	return 1;
 }
+
+#pragma pack(pop)

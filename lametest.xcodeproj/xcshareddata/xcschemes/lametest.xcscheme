@@ -52,7 +52,7 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "/Users/lucius/Downloads/reload.wav"
+            argument = "/Users/lucius/Downloads/interstellaria.wav"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>
